@@ -25,7 +25,7 @@ class App extends Component {
           nodes: JSON.parse(res.data).nodes,
           links: []
         };
-
+        console.log(jsonData.adjacency);
         jsonData.adjacency.map((edges, id) =>
           edges
             .filter(edge => edge.id !== edges[0].id)
@@ -44,13 +44,7 @@ class App extends Component {
         });
       });
   };
-  decorator = props => {
-    return (
-      <button onClick={() => console.log(`You clicked ${props.label}`)}>
-        Click Me
-      </button>
-    );
-  };
+
   renderNetwork() {
     const myConfig = {
       width: 950,
@@ -75,7 +69,9 @@ class App extends Component {
       );
     }
   }
-
+  clearNetwork = file => {
+    this.setState({ showNetwork: false, data: {} });
+  };
   render() {
     return (
       <div className="container">
@@ -89,12 +85,14 @@ class App extends Component {
           }}
           onaddfilestart={fileItem =>
             this.setState({
-              file: fileItem.file.name
+              file: fileItem.file.name,
+              jsonObject: {}
             })
           }
           onprocessfile={(error, file) => {
             this.callGmlToJson(this.state.file);
           }}
+          onremovefile={this.clearNetwork}
         />
 
         {this.state.showNetwork === true ? this.renderNetwork() : null}
