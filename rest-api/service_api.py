@@ -64,7 +64,7 @@ class Converter(Resource):
         python_json = json_graph.adjacency_data(
             graphe)
         json_object = json.dumps(python_json, ensure_ascii=False)
-        print(json_object)
+        #os.remove(os.path.abspath(json_data['gml_data']))
         return json_object
 
 
