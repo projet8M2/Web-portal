@@ -15,7 +15,7 @@ class App extends Component {
     showNetwork: false,
     data: {},
     open: false,
-    node: ""
+    message: ""
   };
 
   closeModal = () => {
@@ -25,6 +25,7 @@ class App extends Component {
     var filePath = "rest-api/uploadedFiles/" + file;
     axios
       .post(`http://127.0.0.1:5000/converter`, { gml_data: filePath })
+      //.post("http://ee7b905d.ngrok.io/converter", { gml_data: filePath })
       .then(res => {
         var jsonData = JSON.parse(res.data);
         var dataCopy = {
@@ -36,7 +37,13 @@ class App extends Component {
           edges
             .filter(edge => edge.id !== edges[0].id)
             .map((edge, index) =>
-              dataCopy.links.push({ source: edges[0].id, target: edge.id })
+              dataCopy.links.push({
+                source: edges[0].id,
+                target: edge.id,
+                LinkLabel: edge.LinkLabel,
+                LinkNote: edge.LinkNote,
+                LinkType: edge.LinkType
+              })
             )
         );
 
@@ -70,6 +77,7 @@ class App extends Component {
           data={this.state.data}
           config={myConfig}
           onClickNode={this.onClickNode}
+          onClickLink={this.onClickLink}
         />
       );
     }
@@ -79,10 +87,19 @@ class App extends Component {
   };
   onClickNode = node => {
     console.log(this.state.open);
-    var test = JSON.stringify(
+    var json_data = JSON.stringify(
       this.state.data.nodes.filter(dataNode => dataNode.id === node)
     );
-    this.setState({ open: true, node: test });
+    this.setState({ open: true, message: json_data });
+  };
+  onClickLink = (source, target) => {
+    console.log(source, target);
+    var json_data = JSON.stringify(
+      this.state.data.links.filter(
+        dataLink => dataLink.source === source && dataLink.target === target
+      )
+    );
+    this.setState({ open: true, message: json_data });
   };
   render() {
     if (this.state.open === true) {
@@ -92,7 +109,7 @@ class App extends Component {
           closeOnDocumentClick
           onClose={this.closeModal}
         >
-          {this.state.node}
+          {this.state.message}
         </Popup>
       );
     }
