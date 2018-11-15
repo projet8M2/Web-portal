@@ -32,19 +32,16 @@ class App extends Component {
           nodes: JSON.parse(res.data).nodes,
           links: []
         };
-        console.log(jsonData.adjacency);
-        jsonData.adjacency.map((edges, id) =>
-          edges
-            .filter(edge => edge.id !== edges[0].id)
-            .map((edge, index) =>
-              dataCopy.links.push({
-                source: edges[0].id,
-                target: edge.id,
-                LinkLabel: edge.LinkLabel,
-                LinkNote: edge.LinkNote,
-                LinkType: edge.LinkType
-              })
-            )
+        console.log(jsonData);
+
+        jsonData.links.forEach(element =>
+          dataCopy.links.push({
+            source: jsonData.nodes[element.source].id,
+            target: jsonData.nodes[element.target].id,
+            LinkLabel: element.LinkLabel,
+            LinkNote: element.LinkNote,
+            LinkType: element.LinkType
+          })
         );
 
         console.log(dataCopy);
@@ -58,8 +55,8 @@ class App extends Component {
 
   renderNetwork() {
     const myConfig = {
-      width: 950,
-      heigth: 2000,
+      width: 920,
+      heigth: 1000,
       nodeHighlightBehavior: true,
       node: {
         color: "lightgreen",

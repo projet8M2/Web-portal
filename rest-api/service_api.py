@@ -61,7 +61,7 @@ class Converter(Resource):
         json_data = request.get_json(force=True)
         graphe = nx.read_gml(os.path.abspath(json_data['gml_data']))
         # create a dictionary in a node-link format that is suitable for JSON serialization
-        python_json = json_graph.adjacency_data(
+        python_json = json_graph.node_link_data(
             graphe)
         json_object = json.dumps(python_json, ensure_ascii=False)
         #os.remove(os.path.abspath(json_data['gml_data']))
