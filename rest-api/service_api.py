@@ -7,6 +7,7 @@ from networkx.readwrite import json_graph
 import json
 import os
 import os.path
+from pymongo import MongoClient
 # Create the application instance
 UPLOAD_FOLDER = "rest-api/uploadedFiles"
 ALLOWED_EXTENSIONS = set(['gml'])
@@ -56,19 +57,59 @@ def upload_file():
 # If we're running in stand alone mode, run the application
 
 
+@app.route('/getgraphlist', methods=['GET'])
+@cross_origin()
+def getGraphNameList():
+    if request.method == 'GET':
+        client = MongoClient('mongodb://localhost:27017/', connect=False)
+        db = client.graphDB
+        collection = db.documentCollection
+        results = collection.find({}, {"graph.label": 1, "_id": 0})
+        documents_result = [document for document in results]
+        print(documents_result)
+        return json.dumps(documents_result, ensure_ascii=False)
+
+
+@app.route('/getsavedgraph', methods=['POST'])
+@cross_origin()
+def getSaved_Graph():
+    if request.method == 'POST':
+        client = MongoClient('mongodb://localhost:27017/', connect=False)
+        db = client.graphDB
+        collection = db.documentCollection
+        results = collection.find(
+            {"graph.label":  request.get_json(force=True)['gml_data'], "_id":  request.get_json(force=True)['gml_data']})
+        documents_result = [document for document in results]
+        return json.dumps(documents_result, ensure_ascii=False)
+
+
 class Converter(Resource):
     def post(self):
         json_data = request.get_json(force=True)
-        graphe = nx.read_gml(os.path.abspath(json_data['gml_data']))
+        graphe = nx.read_gml(os.path.join(os.path.abspath(
+            app.config['UPLOAD_FOLDER']), json_data['gml_data']))
         # create a dictionary in a node-link format that is suitable for JSON serialization
         python_json = json_graph.node_link_data(
             graphe)
         json_object = json.dumps(python_json, ensure_ascii=False)
-        #os.remove(os.path.abspath(json_data['gml_data']))
+        # os.remove(os.path.abspath(json_data['gml_data']))
         return json_object
 
 
+class SaveGraphDB(Resource):
+    def post(self):
+        client = MongoClient('mongodb://localhost:27017/', connect=False)
+        db = client.graphDB
+        collection = db.documentCollection
+        data = request.get_json(force=True)
+        graph = data['gml_data']
+        graph["_id"] = graph['graph']['label']
+        graph_id = collection.insert_one(graph).inserted_id
+        return graph_id
+
+
 api.add_resource(Converter, '/converter')
+api.add_resource(SaveGraphDB, '/saveGraph')
 
 if __name__ == '__main__':
     app.run(debug=True)

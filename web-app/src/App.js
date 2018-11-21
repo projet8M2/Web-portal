@@ -4,9 +4,10 @@ import { FilePond } from "react-filepond";
 import "filepond/dist/filepond.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
-import { Graph } from "react-d3-graph";
 import "react-toastify/dist/ReactToastify.css";
 import Popup from "reactjs-popup";
+import NetworkGraph from "./NetworkGraph.jsx";
+import ButtonList from "./ButtonList.jsx";
 class App extends Component {
   state = {
     // Set initial files
@@ -15,25 +16,25 @@ class App extends Component {
     showNetwork: false,
     data: {},
     open: false,
-    message: ""
+    message: "",
+    savedGraphs: []
   };
 
   closeModal = () => {
     this.setState({ open: false });
   };
   callGmlToJson = file => {
-    var filePath = "rest-api/uploadedFiles/" + file;
     axios
-      .post(`http://127.0.0.1:5000/converter`, { gml_data: filePath })
+      .post(`http://127.0.0.1:5000/converter`, { gml_data: file })
       //.post("http://ee7b905d.ngrok.io/converter", { gml_data: filePath })
       .then(res => {
+        this.clearNetwork();
         var jsonData = JSON.parse(res.data);
         var dataCopy = {
           nodes: JSON.parse(res.data).nodes,
-          links: []
+          links: [],
+          label: jsonData.graph.label
         };
-        console.log(jsonData);
-
         jsonData.links.forEach(element =>
           dataCopy.links.push({
             source: jsonData.nodes[element.source].id,
@@ -43,60 +44,72 @@ class App extends Component {
             LinkType: element.LinkType
           })
         );
-
-        console.log(dataCopy);
         this.setState({
-          jsonObject: JSON.parse(res.data),
+          jsonObject: jsonData,
           showNetwork: true,
           data: dataCopy
         });
       });
   };
-
-  renderNetwork() {
-    const myConfig = {
-      width: 920,
-      heigth: 1000,
-      nodeHighlightBehavior: true,
-      node: {
-        color: "lightgreen",
-        size: 120,
-        highlightStrokeColor: "blue"
-      },
-      link: {
-        highlightColor: "lightblue"
-      }
-    };
-    if (this.state.data.lenght !== 0) {
-      return (
-        <Graph
-          id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
-          data={this.state.data}
-          config={myConfig}
-          onClickNode={this.onClickNode}
-          onClickLink={this.onClickLink}
-        />
-      );
-    }
+  componentDidMount() {
+    axios.get("http://127.0.0.1:5000/getgraphlist").then(res => {
+      res.data.forEach(graph => {
+        this.setState((state, props) => ({
+          savedGraphs: [...state.savedGraphs, graph.graph.label]
+        }));
+      });
+    });
   }
   clearNetwork = file => {
     this.setState({ showNetwork: false, data: {} });
   };
   onClickNode = node => {
-    console.log(this.state.open);
     var json_data = JSON.stringify(
       this.state.data.nodes.filter(dataNode => dataNode.id === node)
     );
     this.setState({ open: true, message: json_data });
   };
   onClickLink = (source, target) => {
-    console.log(source, target);
     var json_data = JSON.stringify(
       this.state.data.links.filter(
         dataLink => dataLink.source === source && dataLink.target === target
       )
     );
     this.setState({ open: true, message: json_data });
+  };
+  onClickButton = event => {
+    axios
+      .post(`http://127.0.0.1:5000/saveGraph`, {
+        gml_data: this.state.jsonObject
+      })
+      .then(res => console.log(res.data));
+  };
+  getSavedGraph = fileName => {
+    axios
+      .post("http://127.0.0.1:5000/getsavedgraph", { gml_data: fileName })
+      .then(res => {
+        this.clearNetwork();
+        var json_data = res.data[0];
+        var dataCopy = {
+          nodes: json_data.nodes,
+          links: [],
+          label: json_data.graph.label
+        };
+        json_data.links.forEach(element =>
+          dataCopy.links.push({
+            source: json_data.nodes[element.source].id,
+            target: json_data.nodes[element.target].id,
+            LinkLabel: element.LinkLabel,
+            LinkNote: element.LinkNote,
+            LinkType: element.LinkType
+          })
+        );
+        this.setState({
+          jsonObject: json_data,
+          showNetwork: true,
+          data: dataCopy
+        });
+      });
   };
   render() {
     if (this.state.open === true) {
@@ -110,30 +123,62 @@ class App extends Component {
         </Popup>
       );
     }
+    if (this.state.savedGraphs.length !== 0) {
+      var listDiv = (
+        <div className="col col-lg-2">
+          <div className="list-group">
+            <ButtonList
+              saveGraph={this.state.savedGraphs}
+              click={this.getSavedGraph}
+            />
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="container">
-        <FilePond
-          allowMultiple={false}
-          ref={ref => (this.pond = ref)}
-          server={{
-            process: "http://127.0.0.1:5000/uploadedFiles",
-            fetch: null,
-            revert: null
-          }}
-          onaddfilestart={fileItem =>
-            this.setState({
-              file: fileItem.file.name,
-              jsonObject: {}
-            })
-          }
-          onprocessfile={(error, file) => {
-            this.callGmlToJson(this.state.file);
-          }}
-          onremovefile={this.clearNetwork}
-        />
-        {this.state.showNetwork === true ? this.renderNetwork() : null}
-        {controlledPopup}
+        <div className="row">
+          {listDiv}
+
+          <div
+            className={
+              this.state.savedGraphs === undefined ||
+              this.state.savedGraphs.length === 0
+                ? "col"
+                : "col-10"
+            }
+          >
+            <FilePond
+              allowMultiple={false}
+              ref={ref => (this.pond = ref)}
+              server={{
+                process: "http://127.0.0.1:5000/uploadedFiles",
+                fetch: null,
+                revert: null
+              }}
+              onaddfilestart={fileItem =>
+                this.setState({
+                  file: fileItem.file.name,
+                  jsonObject: {}
+                })
+              }
+              onprocessfile={(error, file) => {
+                this.callGmlToJson(this.state.file);
+              }}
+            />
+            {this.state.showNetwork === true ? (
+              <NetworkGraph
+                data={this.state.data}
+                onClickNode={this.onClickNode}
+                onClickLink={this.onClickLink}
+                onClickButton={this.onClickButton}
+              />
+            ) : null}
+
+            {controlledPopup}
+          </div>
+        </div>
       </div>
     );
   }
