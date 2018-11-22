@@ -5,6 +5,7 @@ Packages python :<br>
 `$ pip install Flask`<br>
 `$ pip install flask-restful`<br>
 `$ pip install -U flask-cors`<br>
+`$ pip install pymongo`<br>
 ## Installation
 1. Aller dans /web-app via le terminal
 2. Exécuter `$ npm i` (installation des packages node)
