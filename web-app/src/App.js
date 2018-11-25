@@ -68,12 +68,9 @@ class App extends Component {
     this.setState({ open: true, message: json_data[0] });
   };
   onClickLink = (source, target) => {
-    var json_data = JSON.stringify(
-      this.state.data.links.filter(
-        dataLink => dataLink.source === source && dataLink.target === target
-      )
-    );
-    this.setState({ open: true, message: json_data });
+    var json_data = this.state.data.links.filter(dataLink => dataLink.source === source && dataLink.target === target);
+    this.setState({ open: true, message: json_data[0] });
+    console.log('TEST' + JSON.stringify(json_data[0], null, 4))
   };
   onClickButton = event => {
     axios
