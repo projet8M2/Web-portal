@@ -9,7 +9,7 @@ import os
 import os.path
 from pymongo import MongoClient
 # Create the application instance
-UPLOAD_FOLDER = "uploadedFiles"
+UPLOAD_FOLDER = "rest-api/uploadedFiles"
 ALLOWED_EXTENSIONS = set(['gml'])
 ABS_PATH = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder="templates")
@@ -81,6 +81,18 @@ def getSaved_Graph():
             {"graph.label":  request.get_json(force=True)['gml_data'], "_id":  request.get_json(force=True)['gml_data']})
         documents_result = [document for document in results]
         return json.dumps(documents_result, ensure_ascii=False)
+
+
+@app.route('/deletegraph', methods=['POST'])
+@cross_origin()
+def delete_graph():
+    client = MongoClient('mongodb://localhost:27017/', connect=False)
+    db = client.graphDB
+    collection = db.documentCollection
+    result = collection.delete_one(
+        {"graph.label":  request.get_json(force=True)['gml_data'], "_id":  request.get_json(force=True)['gml_data']})
+    print(result)
+    return json.dumps(result.raw_result, ensure_ascii=False)
 
 
 class Converter(Resource):

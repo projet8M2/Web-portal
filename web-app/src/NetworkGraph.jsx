@@ -28,7 +28,28 @@ class NetworkGraph extends Component {
     return (
       <div>
         <Graph ref="graph" {...graphProps} />
-        <button onClick={this.props.onClickButton}>Enregistrer</button>
+        <div className="align-self-center">
+          <button
+            className="btn btn-outline-success"
+            onClick={() => this.props.onClickButton("Enregistrer Graphe")}
+          >
+            Enregistrer Graphe
+          </button>
+          &nbsp;
+          <button
+            className="btn btn-outline-success"
+            onClick={() => this.props.onClickButton("Effacer Graphe")}
+          >
+            Effacer Graphe
+          </button>
+          &nbsp;
+          <button
+            className="btn btn-outline-success"
+            onClick={() => this.props.onClickButton("Charger Service")}
+          >
+            Charger Service
+          </button>
+        </div>
       </div>
     );
   }

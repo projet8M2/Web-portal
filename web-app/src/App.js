@@ -64,7 +64,9 @@ class App extends Component {
     this.setState({ showNetwork: false, data: {} });
   };
   onClickNode = node => {
-    var json_data = this.state.data.nodes.filter(dataNode => dataNode.id === node);
+    var json_data = this.state.data.nodes.filter(
+      dataNode => dataNode.id === node
+    );
     this.setState({ open: true, message: json_data[0] });
   };
   onClickLink = (source, target) => {
@@ -75,12 +77,39 @@ class App extends Component {
     );
     this.setState({ open: true, message: json_data });
   };
-  onClickButton = event => {
+  onClickButton = buttonName => {
+    if (buttonName === "Enregistrer Graphe") {
+      axios
+        .post(`http://127.0.0.1:5000/saveGraph`, {
+          gml_data: this.state.jsonObject
+        })
+        .then(res =>
+          this.setState((state, props) => ({
+            savedGraphs: [
+              ...state.savedGraphs,
+              this.state.jsonObject.graph.label
+            ]
+          }))
+        );
+    } else if (buttonName === "Effacer Graphe") {
+      this.deleteGraph();
+    } else if (buttonName === "Charger Service") {
+      console.log(buttonName);
+    }
+  };
+  deleteGraph = label => {
     axios
-      .post(`http://127.0.0.1:5000/saveGraph`, {
-        gml_data: this.state.jsonObject
+      .post(`http://127.0.0.1:5000/deletegraph`, {
+        gml_data: this.state.jsonObject.graph.label
       })
-      .then(res => console.log(res.data));
+      .then(res => {
+        const label_list = this.state.savedGraphs;
+        const erasedGraph = this.state.jsonObject.graph.label;
+        this.setState({
+          savedGraphs: label_list.filter(label => label !== erasedGraph)
+        });
+        console.log(this.state.savedGraphs);
+      });
   };
   getSavedGraph = fileName => {
     axios
@@ -117,8 +146,9 @@ class App extends Component {
           <tr>
             <th>{k}</th>
             <td>{this.state.message[k]}</td>
-          </tr>);
-      })
+          </tr>
+        );
+      });
       var controlledPopup = (
         <Popup
           open={this.state.open}
@@ -126,9 +156,7 @@ class App extends Component {
           onClose={this.closeModal}
         >
           <table class="table">
-            <tbody>
-              {rows}
-            </tbody>
+            <tbody>{rows}</tbody>
           </table>
         </Popup>
       );
@@ -136,12 +164,10 @@ class App extends Component {
     if (this.state.savedGraphs.length !== 0) {
       var listDiv = (
         <div className="col col-lg-2">
-          <div className="list-group">
-            <ButtonList
-              saveGraph={this.state.savedGraphs}
-              click={this.getSavedGraph}
-            />
-          </div>
+          <ButtonList
+            saveGraph={this.state.savedGraphs}
+            click={this.getSavedGraph}
+          />
         </div>
       );
     }
@@ -149,12 +175,17 @@ class App extends Component {
     return (
       <div className="container">
         <div className="row">
-          {listDiv}
+          {this.state.savedGraphs.length !== 0 && (
+            <ButtonList
+              saveGraph={this.state.savedGraphs}
+              click={this.getSavedGraph}
+            />
+          )}
 
           <div
             className={
               this.state.savedGraphs === undefined ||
-                this.state.savedGraphs.length === 0
+              this.state.savedGraphs.length === 0
                 ? "col"
                 : "col-10"
             }
