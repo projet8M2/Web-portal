@@ -64,10 +64,8 @@ class App extends Component {
     this.setState({ showNetwork: false, data: {} });
   };
   onClickNode = node => {
-    var json_data = JSON.stringify(
-      this.state.data.nodes.filter(dataNode => dataNode.id === node)
-    );
-    this.setState({ open: true, message: json_data });
+    var json_data = this.state.data.nodes.filter(dataNode => dataNode.id === node);
+    this.setState({ open: true, message: json_data[0] });
   };
   onClickLink = (source, target) => {
     var json_data = JSON.stringify(
@@ -112,14 +110,26 @@ class App extends Component {
       });
   };
   render() {
-    if (this.state.open === true) {
+    if (this.state.open) {
+      var rows = [];
+      Object.keys(this.state.message).map(k => {
+        rows.push(
+          <tr>
+            <th>{k}</th>
+            <td>{this.state.message[k]}</td>
+          </tr>);
+      })
       var controlledPopup = (
         <Popup
           open={this.state.open}
           closeOnDocumentClick
           onClose={this.closeModal}
         >
-          {this.state.message}
+          <table class="table">
+            <tbody>
+              {rows}
+            </tbody>
+          </table>
         </Popup>
       );
     }
@@ -144,7 +154,7 @@ class App extends Component {
           <div
             className={
               this.state.savedGraphs === undefined ||
-              this.state.savedGraphs.length === 0
+                this.state.savedGraphs.length === 0
                 ? "col"
                 : "col-10"
             }

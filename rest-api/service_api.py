@@ -9,7 +9,7 @@ import os
 import os.path
 from pymongo import MongoClient
 # Create the application instance
-UPLOAD_FOLDER = "rest-api/uploadedFiles"
+UPLOAD_FOLDER = "uploadedFiles"
 ALLOWED_EXTENSIONS = set(['gml'])
 ABS_PATH = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, template_folder="templates")
