@@ -1,7 +1,7 @@
 # Web-portal
 ## Pré-recquis : Python et NodeJs
 Packages python :<br>
-`$ pip install --upgrade networkx`<br>
+`$ pip install --upgrade networkx==1.11`<br>
 `$ pip install Flask`<br>
 `$ pip install flask-restful`<br>
 `$ pip install -U flask-cors`<br>
