@@ -4,10 +4,12 @@ import { FilePond } from "react-filepond";
 import "filepond/dist/filepond.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Popup from "reactjs-popup";
 import NetworkGraph from "./NetworkGraph.jsx";
 import ButtonList from "./ButtonList.jsx";
+import ServiceGraph from "./ServiceGraph";
 class App extends Component {
   state = {
     // Set initial files
@@ -16,12 +18,23 @@ class App extends Component {
     showNetwork: false,
     data: {},
     open: false,
+    openServicePopup: false,
     message: "",
     savedGraphs: []
   };
+  success = message =>
+    toast.success(message, {
+      position: toast.POSITION.TOP_RIGHT
+    });
+
+  error = message => {
+    toast.error(message, {
+      position: toast.POSITION.TOP_RIGHT
+    });
+  };
 
   closeModal = () => {
-    this.setState({ open: false });
+    this.setState({ open: false, openServicePopup: false });
   };
   callGmlToJson = file => {
     axios
@@ -70,9 +83,11 @@ class App extends Component {
     this.setState({ open: true, message: json_data[0] });
   };
   onClickLink = (source, target) => {
-    var json_data = this.state.data.links.filter(dataLink => dataLink.source === source && dataLink.target === target);
+    var json_data = this.state.data.links.filter(
+      dataLink => dataLink.source === source && dataLink.target === target
+    );
     this.setState({ open: true, message: json_data[0] });
-    console.log('TEST' + JSON.stringify(json_data[0], null, 4))
+    console.log("TEST" + JSON.stringify(json_data[0], null, 4));
   };
   onClickButton = buttonName => {
     if (buttonName === "Enregistrer Graphe") {
@@ -80,18 +95,19 @@ class App extends Component {
         .post(`http://127.0.0.1:5000/saveGraph`, {
           gml_data: this.state.jsonObject
         })
-        .then(res =>
+        .then(res => {
           this.setState((state, props) => ({
             savedGraphs: [
               ...state.savedGraphs,
               this.state.jsonObject.graph.label
             ]
-          }))
-        );
+          }));
+          this.success("Votre Graphe a été enregistré avec succès");
+        });
     } else if (buttonName === "Effacer Graphe") {
       this.deleteGraph();
     } else if (buttonName === "Charger Service") {
-      console.log(buttonName);
+      this.setState({ openServicePopup: true });
     }
   };
   deleteGraph = label => {
@@ -106,6 +122,7 @@ class App extends Component {
           savedGraphs: label_list.filter(label => label !== erasedGraph)
         });
         console.log(this.state.savedGraphs);
+        this.success("Votre Graphe a été effacé avec succès!");
       });
   };
   getSavedGraph = fileName => {
@@ -158,6 +175,12 @@ class App extends Component {
         </Popup>
       );
     }
+    var servicePopup = (
+      <ServiceGraph
+        open={this.state.openServicePopup}
+        closeModal={this.closeModal}
+      />
+    );
     if (this.state.savedGraphs.length !== 0) {
       var listDiv = (
         <div className="col col-lg-2">
@@ -187,6 +210,7 @@ class App extends Component {
                 : "col-10"
             }
           >
+            <ToastContainer />
             <FilePond
               allowMultiple={false}
               ref={ref => (this.pond = ref)}
@@ -215,6 +239,7 @@ class App extends Component {
             ) : null}
 
             {controlledPopup}
+            {servicePopup}
           </div>
         </div>
       </div>

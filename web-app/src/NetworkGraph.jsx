@@ -1,6 +1,6 @@
 import { Graph } from "react-d3-graph";
 import React, { Component } from "react";
-
+import "bootstrap/dist/css/bootstrap.min.css";
 class NetworkGraph extends Component {
   render() {
     const myConfig = {
@@ -16,6 +16,7 @@ class NetworkGraph extends Component {
         highlightColor: "lightblue"
       }
     };
+
     const data = this.props.data;
 
     const graphProps = {
@@ -28,7 +29,7 @@ class NetworkGraph extends Component {
     return (
       <div>
         <Graph ref="graph" {...graphProps} />
-        <div className="align-self-center">
+        <div className="col-12 text-center">
           <button
             className="btn btn-outline-success"
             onClick={() => this.props.onClickButton("Enregistrer Graphe")}
