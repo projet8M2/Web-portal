@@ -48,15 +48,11 @@ class App extends Component {
           links: [],
           label: jsonData.graph.label
         };
-        jsonData.links.forEach(element =>
-          dataCopy.links.push({
-            source: jsonData.nodes[element.source].id,
-            target: jsonData.nodes[element.target].id,
-            LinkLabel: element.LinkLabel,
-            LinkNote: element.LinkNote,
-            LinkType: element.LinkType
-          })
-        );
+        jsonData.links.forEach(element => {
+          element.source = jsonData.nodes[element.source].id;
+          element.target = jsonData.nodes[element.target].id;
+          dataCopy.links.push(element);
+        });
         this.setState({
           jsonObject: jsonData,
           showNetwork: true,
@@ -96,13 +92,20 @@ class App extends Component {
           gml_data: this.state.jsonObject
         })
         .then(res => {
-          this.setState((state, props) => ({
-            savedGraphs: [
-              ...state.savedGraphs,
-              this.state.jsonObject.graph.label
-            ]
-          }));
-          this.success("Votre Graphe a été enregistré avec succès");
+          console.log(res);
+          if (res.data !== "error") {
+            this.setState((state, props) => ({
+              savedGraphs: [
+                ...state.savedGraphs,
+                this.state.jsonObject.graph.label
+              ]
+            }));
+            this.success("Votre Graphe a été enregistré avec succès");
+          } else {
+            this.error(
+              "Votre Graphe n'a pas été enregistré, vérifiez s'il est déjà enregistré"
+            );
+          }
         });
     } else if (buttonName === "Effacer Graphe") {
       this.deleteGraph();
@@ -116,13 +119,19 @@ class App extends Component {
         gml_data: this.state.jsonObject.graph.label
       })
       .then(res => {
-        const label_list = this.state.savedGraphs;
-        const erasedGraph = this.state.jsonObject.graph.label;
-        this.setState({
-          savedGraphs: label_list.filter(label => label !== erasedGraph)
-        });
-        console.log(this.state.savedGraphs);
-        this.success("Votre Graphe a été effacé avec succès!");
+        if (res.data.n !== 0) {
+          const label_list = this.state.savedGraphs;
+          const erasedGraph = this.state.jsonObject.graph.label;
+          this.setState({
+            savedGraphs: label_list.filter(label => label !== erasedGraph)
+          });
+          console.log(this.state.savedGraphs);
+          this.success("Votre Graphe a été effacé avec succès!");
+        } else {
+          this.error(
+            "Votre Graphe n'a pas été effacé, vérifiez s'il est déjà effacé"
+          );
+        }
       });
   };
   getSavedGraph = fileName => {
@@ -214,6 +223,7 @@ class App extends Component {
             <FilePond
               allowMultiple={false}
               ref={ref => (this.pond = ref)}
+              labelIdle='Glissez et déposez votre fichier GML ou <span class="filepond--label-action"> recherchez sur votre ordinateur </span>'
               server={{
                 process: "http://127.0.0.1:5000/uploadedFiles",
                 fetch: null,

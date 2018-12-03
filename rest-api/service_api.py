@@ -89,10 +89,13 @@ def delete_graph():
     client = MongoClient('mongodb://localhost:27017/', connect=False)
     db = client.graphDB
     collection = db.documentCollection
-    result = collection.delete_one(
-        {"graph.label":  request.get_json(force=True)['gml_data'], "_id":  request.get_json(force=True)['gml_data']})
-    print(result)
-    return json.dumps(result.raw_result, ensure_ascii=False)
+    try:
+        result = collection.delete_one(
+            {"graph.label":  request.get_json(force=True)['gml_data'], "_id":  request.get_json(force=True)['gml_data']}).raw_result
+        print(result)
+    except:
+        result =  "error" 
+    return json.dumps(result, ensure_ascii=False)
 
 
 class Converter(Resource):
@@ -101,6 +104,7 @@ class Converter(Resource):
         graphe = nx.read_gml(os.path.join(os.path.abspath(
             app.config['UPLOAD_FOLDER']), json_data['gml_data']))
         # create a dictionary in a node-link format that is suitable for JSON serialization
+        nx.set_edge_attributes(graphe,"bandwith", 50)
         python_json = json_graph.node_link_data(
             graphe)
         json_object = json.dumps(python_json, ensure_ascii=False)
@@ -116,7 +120,10 @@ class SaveGraphDB(Resource):
         data = request.get_json(force=True)
         graph = data['gml_data']
         graph["_id"] = graph['graph']['label']
-        graph_id = collection.insert_one(graph).inserted_id
+        try:
+            graph_id = collection.insert_one(graph).inserted_id
+        except:
+            graph_id = "error"
         return graph_id
 
 
