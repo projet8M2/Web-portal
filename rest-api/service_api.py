@@ -7,6 +7,7 @@ from networkx.readwrite import json_graph
 import json
 import os
 import os.path
+from collections import OrderedDict
 from pymongo import MongoClient
 # Create the application instance
 UPLOAD_FOLDER = "rest-api/uploadedFiles"
@@ -94,8 +95,49 @@ def delete_graph():
             {"graph.label":  request.get_json(force=True)['gml_data'], "_id":  request.get_json(force=True)['gml_data']}).raw_result
         print(result)
     except:
-        result =  "error" 
+        result = "error"
     return json.dumps(result, ensure_ascii=False)
+
+
+@app.route('/shortestpath', methods=['POST'])
+@cross_origin()
+def shortestpath():
+    json_object = request.get_json(force=True)['graph_data']
+    graphe = json_graph.node_link_graph(json_object)
+    service_data = request.get_json(force=True)['gml_data']
+    djkistra_path = []
+    old_target = ""
+    lenght = 0 
+    for key, value in enumerate(service_data['links']):
+        actual_node = value['source']
+        target_node = value['target']
+        try:
+            sub_path = nx.dijkstra_path(graphe, actual_node, target_node)
+        except nx.exception.NetworkXNoPath:
+            target_node_adjusted = actual_node
+            actual_node = target_node
+            target_node = target_node_adjusted
+            sub_path = nx.dijkstra_path(
+                graphe, actual_node, target_node)
+        lenght = len(sub_path)
+        for index, node in enumerate(sub_path):
+            if index<lenght-1:
+                try:
+                    actual_bandwith = graphe[node][sub_path[index+1]]['bandwith']
+                except KeyError:
+                    actual_bandwith = 0
+                graphe[node][sub_path[index+1]
+                            ]['bandwith'] = actual_bandwith - value['bandwith']
+        if key > 0:
+            if old_target ==  target_node:
+                sub_path = list(reversed(sub_path))
+            sub_path = sub_path[1:]
+        djkistra_path.extend(sub_path)
+        old_target = target_node
+    python_json = json_graph.node_link_data(
+            graphe)
+    json_object = json.dumps(python_json, ensure_ascii=False)
+    return json.dumps({"path": djkistra_path, 'graph': json_object})
 
 
 class Converter(Resource):
@@ -104,7 +146,8 @@ class Converter(Resource):
         graphe = nx.read_gml(os.path.join(os.path.abspath(
             app.config['UPLOAD_FOLDER']), json_data['gml_data']))
         # create a dictionary in a node-link format that is suitable for JSON serialization
-        nx.set_edge_attributes(graphe,"bandwith", 50)
+        if(json_data['service'] != True or json_data['service'] == None):
+            nx.set_edge_attributes(graphe,  50, "bandwith")
         python_json = json_graph.node_link_data(
             graphe)
         json_object = json.dumps(python_json, ensure_ascii=False)

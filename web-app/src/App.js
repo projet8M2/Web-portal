@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./App.css";
 import { FilePond } from "react-filepond";
 import "filepond/dist/filepond.min.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap3/dist/css/bootstrap.min.css";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,7 +20,11 @@ class App extends Component {
     open: false,
     openServicePopup: false,
     message: "",
-    savedGraphs: []
+    savedGraphs: [],
+    service_data: {},
+    showServiceP: false,
+    showService: false,
+    stringPath: ""
   };
   success = message =>
     toast.success(message, {
@@ -34,14 +38,22 @@ class App extends Component {
   };
 
   closeModal = () => {
-    this.setState({ open: false, openServicePopup: false });
+    this.setState({
+      open: false,
+      openServicePopup: false,
+      showService: false,
+      showServiceP: false
+    });
   };
-  callGmlToJson = file => {
+
+  callGmlToJson = (file, service) => {
     axios
-      .post(`http://127.0.0.1:5000/converter`, { gml_data: file })
+      .post(`http://127.0.0.1:5000/converter`, {
+        gml_data: file,
+        service: service
+      })
       //.post("http://ee7b905d.ngrok.io/converter", { gml_data: filePath })
       .then(res => {
-        this.clearNetwork();
         var jsonData = JSON.parse(res.data);
         var dataCopy = {
           nodes: JSON.parse(res.data).nodes,
@@ -49,17 +61,59 @@ class App extends Component {
           label: jsonData.graph.label
         };
         jsonData.links.forEach(element => {
-          element.source = jsonData.nodes[element.source].id;
-          element.target = jsonData.nodes[element.target].id;
           dataCopy.links.push(element);
         });
+        if (service === false) {
+          this.clearNetwork();
+          this.setState({
+            jsonObject: jsonData,
+            showNetwork: true,
+            data: dataCopy
+          });
+        } else {
+          this.setState({
+            showService: true,
+            service_data: dataCopy
+          });
+          this.showBestPath();
+        }
+      });
+  };
+
+  showBestPath() {
+    axios
+      .post("http://127.0.0.1:5000/shortestpath", {
+        gml_data: this.state.service_data,
+        graph_data: this.state.jsonObject
+      })
+      .then(res => {
+        var path = "";
+        res.data.path.map(node => {
+          if (path.length === 0) {
+            path = node;
+          } else {
+            path += "-" + node;
+          }
+        });
+        var jsonData = JSON.parse(res.data.graph);
+        var dataCopy = {
+          nodes: jsonData.nodes,
+          links: [],
+          label: jsonData.graph.label
+        };
+        jsonData.links.forEach(element => {
+          dataCopy.links.push(element);
+        });
+
+        this.clearNetwork();
         this.setState({
+          stringPath: path,
           jsonObject: jsonData,
           showNetwork: true,
           data: dataCopy
         });
       });
-  };
+  }
   componentDidMount() {
     axios.get("http://127.0.0.1:5000/getgraphlist").then(res => {
       res.data.forEach(graph => {
@@ -70,7 +124,7 @@ class App extends Component {
     });
   }
   clearNetwork = file => {
-    this.setState({ showNetwork: false, data: {} });
+    this.setState({ showNetwork: false, data: {}, stringPath: "" });
   };
   onClickNode = node => {
     var json_data = this.state.data.nodes.filter(
@@ -83,8 +137,20 @@ class App extends Component {
       dataLink => dataLink.source === source && dataLink.target === target
     );
     this.setState({ open: true, message: json_data[0] });
-    console.log("TEST" + JSON.stringify(json_data[0], null, 4));
   };
+  onClickNodeService = node => {
+    var json_data = this.state.service_data.nodes.filter(
+      dataNode => dataNode.id === node
+    );
+    this.setState({ showServiceP: true, message: json_data[0] });
+  };
+  onClickLinkService = (source, target) => {
+    var json_data = this.state.service_data.links.filter(
+      dataLink => dataLink.source === source && dataLink.target === target
+    );
+    this.setState({ showServiceP: true, message: json_data[0] });
+  };
+
   onClickButton = buttonName => {
     if (buttonName === "Enregistrer Graphe") {
       axios
@@ -145,15 +211,10 @@ class App extends Component {
           links: [],
           label: json_data.graph.label
         };
-        json_data.links.forEach(element =>
-          dataCopy.links.push({
-            source: json_data.nodes[element.source].id,
-            target: json_data.nodes[element.target].id,
-            LinkLabel: element.LinkLabel,
-            LinkNote: element.LinkNote,
-            LinkType: element.LinkType
-          })
-        );
+        json_data.links.forEach(element => {
+          console.log(element);
+          dataCopy.links.push(element);
+        });
         this.setState({
           jsonObject: json_data,
           showNetwork: true,
@@ -178,7 +239,7 @@ class App extends Component {
           closeOnDocumentClick
           onClose={this.closeModal}
         >
-          <table class="table">
+          <table className="table">
             <tbody>{rows}</tbody>
           </table>
         </Popup>
@@ -188,21 +249,19 @@ class App extends Component {
       <ServiceGraph
         open={this.state.openServicePopup}
         closeModal={this.closeModal}
+        server="http://127.0.0.1:5000/uploadedFiles"
+        serverProcess={this.callGmlToJson}
+        data={this.state.service_data}
+        onClickNode={this.onClickNodeService}
+        onClickLink={this.onClickLinkService}
+        show={this.state.showService}
+        showTable={this.state.showServiceP}
+        message={this.state.message}
       />
     );
-    if (this.state.savedGraphs.length !== 0) {
-      var listDiv = (
-        <div className="col col-lg-2">
-          <ButtonList
-            saveGraph={this.state.savedGraphs}
-            click={this.getSavedGraph}
-          />
-        </div>
-      );
-    }
 
     return (
-      <div className="container">
+      <div className="container-fluid">
         <div className="row">
           {this.state.savedGraphs.length !== 0 && (
             <ButtonList
@@ -216,11 +275,12 @@ class App extends Component {
               this.state.savedGraphs === undefined ||
               this.state.savedGraphs.length === 0
                 ? "col"
-                : "col-10"
+                : "col-md-10"
             }
           >
             <ToastContainer />
             <FilePond
+              height={50}
               allowMultiple={false}
               ref={ref => (this.pond = ref)}
               labelIdle='Glissez et déposez votre fichier GML ou <span class="filepond--label-action"> recherchez sur votre ordinateur </span>'
@@ -236,7 +296,7 @@ class App extends Component {
                 })
               }
               onprocessfile={(error, file) => {
-                this.callGmlToJson(this.state.file);
+                this.callGmlToJson(this.state.file, false);
               }}
             />
             {this.state.showNetwork === true ? (
@@ -245,9 +305,9 @@ class App extends Component {
                 onClickNode={this.onClickNode}
                 onClickLink={this.onClickLink}
                 onClickButton={this.onClickButton}
+                path={this.state.stringPath}
               />
             ) : null}
-
             {controlledPopup}
             {servicePopup}
           </div>
