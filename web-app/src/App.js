@@ -99,16 +99,10 @@ class App extends Component {
         var highlighted = await this.highlightPath(res.data.path);
         var dataCopy = {
           nodes: jsonData.nodes,
-          links: [],
           nodes: highlighted.nodes,
           links: highlighted.links,
           label: jsonData.graph.label
         };
-        jsonData.links.forEach(element => {
-        /*jsonData.links.forEach(element => {
-          dataCopy.links.push(element);
-        });*/
-        });
 
         this.clearNetwork();
         this.setState({
