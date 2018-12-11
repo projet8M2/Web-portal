@@ -80,7 +80,7 @@ class App extends Component {
       });
   };
 
-  async showBestPath() {
+  showBestPath() {
     axios
       .post("http://127.0.0.1:5000/shortestpath", {
         gml_data: this.state.service_data,
@@ -98,13 +98,17 @@ class App extends Component {
         var jsonData = JSON.parse(res.data.graph);
         var highlighted = await this.highlightPath(res.data.path);
         var dataCopy = {
+          nodes: jsonData.nodes,
+          links: [],
           nodes: highlighted.nodes,
           links: highlighted.links,
           label: jsonData.graph.label
         };
+        jsonData.links.forEach(element => {
         /*jsonData.links.forEach(element => {
           dataCopy.links.push(element);
         });*/
+        });
 
         this.clearNetwork();
         this.setState({
@@ -252,7 +256,7 @@ class App extends Component {
     res.links = links
     return res;
   }
-
+  
   render() {
     if (this.state.open) {
       var rows = [];
@@ -304,7 +308,7 @@ class App extends Component {
           <div
             className={
               this.state.savedGraphs === undefined ||
-                this.state.savedGraphs.length === 0
+              this.state.savedGraphs.length === 0
                 ? "col"
                 : "col-md-10"
             }
