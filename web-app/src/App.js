@@ -86,7 +86,7 @@ class App extends Component {
         gml_data: this.state.service_data,
         graph_data: this.state.jsonObject
       })
-      .then(res => {
+      .then(async res => {
         var path = "";
         res.data.path.map(node => {
           if (path.length === 0) {
@@ -96,14 +96,13 @@ class App extends Component {
           }
         });
         var jsonData = JSON.parse(res.data.graph);
+        var highlighted = await this.highlightPath(res.data.path);
         var dataCopy = {
           nodes: jsonData.nodes,
-          links: [],
+          nodes: highlighted.nodes,
+          links: highlighted.links,
           label: jsonData.graph.label
         };
-        jsonData.links.forEach(element => {
-          dataCopy.links.push(element);
-        });
 
         this.clearNetwork();
         this.setState({
@@ -158,7 +157,6 @@ class App extends Component {
           gml_data: this.state.jsonObject
         })
         .then(res => {
-          console.log(res);
           if (res.data !== "error") {
             this.setState((state, props) => ({
               savedGraphs: [
@@ -191,7 +189,6 @@ class App extends Component {
           this.setState({
             savedGraphs: label_list.filter(label => label !== erasedGraph)
           });
-          console.log(this.state.savedGraphs);
           this.success("Votre Graphe a été effacé avec succès!");
         } else {
           this.error(
@@ -212,7 +209,6 @@ class App extends Component {
           label: json_data.graph.label
         };
         json_data.links.forEach(element => {
-          console.log(element);
           dataCopy.links.push(element);
         });
         this.setState({
@@ -222,6 +218,39 @@ class App extends Component {
         });
       });
   };
+
+  async highlightPath(ids) {
+    var nodes = this.state.data.nodes;
+    var links = this.state.data.links;
+    await nodes.map(node => {
+      if (ids.includes(node.id)) {
+        node.color = "#1b9fe0";
+      }
+    })
+    await links.map(link => {
+      const src = ids.indexOf(link.source);
+      const targ = ids.indexOf(link.target);
+      if (src !== -1 && targ !== -1) {
+        const ecart = Math.abs(src-targ);
+        if(ecart == 1){
+          link.color = "#fdbf2f";
+        }
+      }
+    })
+    this.setState(prev => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        nodes: nodes,
+        links: links
+      }
+    }));
+    var res = {};
+    res.nodes = nodes;
+    res.links = links
+    return res;
+  }
+  
   render() {
     if (this.state.open) {
       var rows = [];
