@@ -7,15 +7,17 @@ class NetworkGraph extends Component {
     const myConfig = {
       width: 920,
       height: 500,
-      directed: true,
+      directed: false,
       nodeHighlightBehavior: false,
       node: {
         color: "lightgreen",
         size: 120,
-        highlightStrokeColor: "blue"
+        highlightFontWeight: "bold"
       },
       link: {
-        highlightColor: "lightblue"
+        highlightColor: "lightgreen",
+        strokeWidth: 1.5,
+        mouseCursor: "pointer",
       }
     };
 

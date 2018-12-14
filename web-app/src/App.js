@@ -227,7 +227,7 @@ class App extends Component {
     var links = this.state.data.links;
     await nodes.map(node => {
       if (ids.includes(node.id)) {
-        node.color = "#1b9fe0";
+        node.color = "#5bc0de";
       }
     })
     await links.map(link => {
@@ -236,7 +236,7 @@ class App extends Component {
       if (src !== -1 && targ !== -1) {
         const ecart = Math.abs(src - targ);
         if (ecart == 1) {
-          link.color = "#1b9fe0";
+          link.color = "lightblue";
         }
       }
     })
