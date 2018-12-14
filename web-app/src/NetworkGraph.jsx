@@ -7,15 +7,17 @@ class NetworkGraph extends Component {
     const myConfig = {
       width: 920,
       height: 500,
-      directed: true,
+      directed: false,
       nodeHighlightBehavior: false,
       node: {
         color: "lightgreen",
         size: 120,
-        highlightStrokeColor: "blue"
+        highlightFontWeight: "bold"
       },
       link: {
-        highlightColor: "lightblue"
+        highlightColor: "lightgreen",
+        strokeWidth: 1.5,
+        mouseCursor: "pointer",
       }
     };
 
@@ -38,28 +40,31 @@ class NetworkGraph extends Component {
       );
     }
     return (
-      <div>
+      <div class ="graph">
         <Graph ref="graph" {...graphProps} />
         {path}
-        <div className="col-12 text-center">
+        <div className="col-12 text-center actions">
           <button
-            className="btn btn-primary"
+            className="btn btn-success"
             onClick={() => this.props.onClickButton("Enregistrer Graphe")}
           >
+          <span class="glyphicon glyphicon-saved" aria-hidden="true"></span>
             Enregistrer Graphe
           </button>
           &nbsp;
           <button
-            className="btn btn-primary"
+            className="btn btn-danger"
             onClick={() => this.props.onClickButton("Effacer Graphe")}
           >
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 
             Effacer Graphe
           </button>
           &nbsp;
           <button
-            className="btn btn-primary"
+            className="btn btn-info"
             onClick={() => this.props.onClickButton("Charger Service")}
           >
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
             Charger Service
           </button>
         </div>

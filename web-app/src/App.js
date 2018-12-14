@@ -10,6 +10,8 @@ import Popup from "reactjs-popup";
 import NetworkGraph from "./NetworkGraph.jsx";
 import ButtonList from "./ButtonList.jsx";
 import ServiceGraph from "./ServiceGraph";
+import logo from './img/logo1.png'
+
 class App extends Component {
   state = {
     // Set initial files
@@ -113,6 +115,7 @@ class App extends Component {
         });
       });
   }
+
   componentDidMount() {
     axios.get("http://127.0.0.1:5000/getgraphlist").then(res => {
       res.data.forEach(graph => {
@@ -224,16 +227,16 @@ class App extends Component {
     var links = this.state.data.links;
     await nodes.map(node => {
       if (ids.includes(node.id)) {
-        node.color = "#1b9fe0";
+        node.color = "#5bc0de";
       }
     })
     await links.map(link => {
       const src = ids.indexOf(link.source);
       const targ = ids.indexOf(link.target);
       if (src !== -1 && targ !== -1) {
-        const ecart = Math.abs(src-targ);
-        if(ecart == 1){
-          link.color = "#fdbf2f";
+        const ecart = Math.abs(src - targ);
+        if (ecart == 1) {
+          link.color = "lightblue";
         }
       }
     })
@@ -250,23 +253,26 @@ class App extends Component {
     res.links = links
     return res;
   }
-  
+
   render() {
     if (this.state.open) {
       var rows = [];
       Object.keys(this.state.message).map(k => {
-        rows.push(
-          <tr>
-            <th>{k}</th>
-            <td>{this.state.message[k]}</td>
-          </tr>
-        );
+        if (k !== 'color') {
+          rows.push(
+            <tr>
+              <th>{k}</th>
+              <td>{this.state.message[k]}</td>
+            </tr>
+          );
+        }
       });
       var controlledPopup = (
         <Popup
           open={this.state.open}
           closeOnDocumentClick
           onClose={this.closeModal}
+          contentStyle={{padding: 0}}
         >
           <table className="table">
             <tbody>{rows}</tbody>
@@ -290,7 +296,17 @@ class App extends Component {
     );
 
     return (
-      <div className="container-fluid">
+      <div className="container">
+        <div className="row">
+          <div className="logo-container">
+            <div className="logo-img">
+              <img src={logo} alt="logo" width="50px" />
+            </div>
+            <div className="logo-txt">
+              Web portal
+          </div>
+          </div>
+        </div>
         <div className="row">
           {this.state.savedGraphs.length !== 0 && (
             <ButtonList
@@ -302,7 +318,7 @@ class App extends Component {
           <div
             className={
               this.state.savedGraphs === undefined ||
-              this.state.savedGraphs.length === 0
+                this.state.savedGraphs.length === 0
                 ? "col"
                 : "col-md-10"
             }
