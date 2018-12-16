@@ -100,7 +100,6 @@ class App extends Component {
         var jsonData = JSON.parse(res.data.graph);
         var highlighted = await this.highlightPath(res.data.path);
         var dataCopy = {
-          nodes: jsonData.nodes,
           nodes: highlighted.nodes,
           links: highlighted.links,
           label: jsonData.graph.label
@@ -178,6 +177,8 @@ class App extends Component {
       this.deleteGraph();
     } else if (buttonName === "Charger Service") {
       this.setState({ openServicePopup: true });
+    }else if (buttonName === "Calculer Latence") {
+      this.EnrichWithDelay();
     }
   };
   deleteGraph = label => {
@@ -206,6 +207,30 @@ class App extends Component {
       .then(res => {
         this.clearNetwork();
         var json_data = res.data[0];
+        var dataCopy = {
+          nodes: json_data.nodes,
+          links: [],
+          label: json_data.graph.label
+        };
+        json_data.links.forEach(element => {
+          dataCopy.links.push(element);
+        });
+        this.setState({
+          jsonObject: json_data,
+          showNetwork: true,
+          data: dataCopy
+        });
+      });
+  };
+
+  EnrichWithDelay() {
+    axios
+      .post("http://127.0.0.1:5000/enrichwithdelay", { graph_data: this.state.jsonObject })
+      .then(res => {
+        this.clearNetwork();
+        console.log('RES ' + JSON.stringify(res, null, 4))
+        var json_dataStr = res.data.graph;
+        var json_data = JSON.parse(json_dataStr);
         var dataCopy = {
           nodes: json_data.nodes,
           links: [],
