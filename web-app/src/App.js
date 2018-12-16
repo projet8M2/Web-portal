@@ -10,7 +10,7 @@ import Popup from "reactjs-popup";
 import NetworkGraph from "./NetworkGraph.jsx";
 import ButtonList from "./ButtonList.jsx";
 import ServiceGraph from "./ServiceGraph";
-import logo from './img/logo1.png'
+import logo from "./img/logo1.png";
 
 class App extends Component {
   state = {
@@ -100,7 +100,6 @@ class App extends Component {
         var jsonData = JSON.parse(res.data.graph);
         var highlighted = await this.highlightPath(res.data.path);
         var dataCopy = {
-          nodes: jsonData.nodes,
           nodes: highlighted.nodes,
           links: highlighted.links,
           label: jsonData.graph.label
@@ -178,6 +177,8 @@ class App extends Component {
       this.deleteGraph();
     } else if (buttonName === "Charger Service") {
       this.setState({ openServicePopup: true });
+    } else if (buttonName === "Calculer Latence") {
+      this.EnrichWithDelay();
     }
   };
   deleteGraph = label => {
@@ -222,6 +223,32 @@ class App extends Component {
       });
   };
 
+  EnrichWithDelay() {
+    axios
+      .post("http://127.0.0.1:5000/enrichwithdelay", {
+        graph_data: this.state.jsonObject
+      })
+      .then(res => {
+        this.clearNetwork();
+        var json_dataStr = res.data.graph;
+        var json_data = JSON.parse(json_dataStr);
+        var dataCopy = {
+          nodes: json_data.nodes,
+          links: [],
+          label: json_data.graph.label
+        };
+        json_data.links.forEach(element => {
+          dataCopy.links.push(element);
+        });
+        this.setState({
+          jsonObject: json_data,
+          showNetwork: true,
+          data: dataCopy
+        });
+        this.success("Latence calculée avec succès!");
+      });
+  }
+
   async highlightPath(ids) {
     var nodes = this.state.data.nodes;
     var links = this.state.data.links;
@@ -229,17 +256,17 @@ class App extends Component {
       if (ids.includes(node.id)) {
         node.color = "#5bc0de";
       }
-    })
+    });
     await links.map(link => {
       const src = ids.indexOf(link.source);
       const targ = ids.indexOf(link.target);
       if (src !== -1 && targ !== -1) {
         const ecart = Math.abs(src - targ);
-        if (ecart == 1) {
+        if (ecart === 1) {
           link.color = "lightblue";
         }
       }
-    })
+    });
     this.setState(prev => ({
       ...prev,
       data: {
@@ -250,7 +277,7 @@ class App extends Component {
     }));
     var res = {};
     res.nodes = nodes;
-    res.links = links
+    res.links = links;
     return res;
   }
 
@@ -258,7 +285,7 @@ class App extends Component {
     if (this.state.open) {
       var rows = [];
       Object.keys(this.state.message).map(k => {
-        if (k !== 'color') {
+        if (k !== "color") {
           rows.push(
             <tr>
               <th>{k}</th>
@@ -272,7 +299,7 @@ class App extends Component {
           open={this.state.open}
           closeOnDocumentClick
           onClose={this.closeModal}
-          contentStyle={{padding: 0}}
+          contentStyle={{ padding: 0 }}
         >
           <table className="table">
             <tbody>{rows}</tbody>
@@ -302,9 +329,7 @@ class App extends Component {
             <div className="logo-img">
               <img src={logo} alt="logo" width="50px" />
             </div>
-            <div className="logo-txt">
-              Web portal
-          </div>
+            <div className="logo-txt">Web portal</div>
           </div>
         </div>
         <div className="row">
@@ -318,7 +343,7 @@ class App extends Component {
           <div
             className={
               this.state.savedGraphs === undefined ||
-                this.state.savedGraphs.length === 0
+              this.state.savedGraphs.length === 0
                 ? "col"
                 : "col-md-10"
             }

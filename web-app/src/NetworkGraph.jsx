@@ -40,7 +40,7 @@ class NetworkGraph extends Component {
       );
     }
     return (
-      <div class ="graph">
+      <div className ="graph">
         <Graph ref="graph" {...graphProps} />
         {path}
         <div className="col-12 text-center actions">
@@ -66,6 +66,14 @@ class NetworkGraph extends Component {
           >
           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
             Charger Service
+          </button>
+          &nbsp;
+          <button
+            className="btn btn-info"
+            onClick={() => this.props.onClickButton("Calculer Latence")}
+          >
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
+            Calculer Latence
           </button>
         </div>
       </div>

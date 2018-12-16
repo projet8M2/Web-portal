@@ -9,6 +9,10 @@ import os
 import os.path
 from collections import OrderedDict
 from pymongo import MongoClient
+import Calculations as calc
+import glob
+import sys
+
 # Create the application instance
 UPLOAD_FOLDER = "rest-api/uploadedFiles"
 ALLOWED_EXTENSIONS = set(['gml'])
@@ -139,6 +143,32 @@ def shortestpath():
     json_object = json.dumps(python_json, ensure_ascii=False)
     return json.dumps({"path": djkistra_path, 'graph': json_object})
 
+@app.route('/enrichwithdelay', methods=['POST'])
+@cross_origin()
+def EnrichWithDelay():
+    json_object = request.get_json(force=True)['graph_data']
+    graphe = json_graph.node_link_graph(json_object)
+    nodes = graphe.nodes(True)
+    for nodes_index in nx.connected_components(graphe):
+        it_edge = graphe.edges(nodes_index).__iter__()
+        try:
+            while it_edge:
+                edge = it_edge.__next__()
+                node_src = nodes[edge[0]]
+                node_dst = nodes[edge[1]]
+                lat1 = node_src.get('Latitude')
+                long1 = node_src.get('Longitude')
+                lat2 = node_dst.get('Latitude')
+                long2 = node_dst.get('Longitude')
+                if((lat1 != None) and (lat2 != None) and (long1 != None) and (long2 != None)):
+                    delay = calc.getLinkDelay(lat1, long1, lat2, long2)
+                    graphe[edge[0]][edge[1]]['delay'] = delay
+        except:
+            pass
+
+    data = json_graph.node_link_data(graphe)
+    json_object = json.dumps(data, ensure_ascii=False)
+    return json.dumps({'graph': json_object})
 
 class Converter(Resource):
     def post(self):
