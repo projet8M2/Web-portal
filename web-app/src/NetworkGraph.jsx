@@ -40,7 +40,7 @@ class NetworkGraph extends Component {
       );
     }
     return (
-      <div class ="graph">
+      <div className ="graph">
         <Graph ref="graph" {...graphProps} />
         {path}
         <div className="col-12 text-center actions">
