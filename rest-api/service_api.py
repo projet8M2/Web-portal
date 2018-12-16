@@ -7,6 +7,7 @@ from networkx.readwrite import json_graph
 import json
 import os
 import os.path
+import GraphStructure as graphStruc
 from collections import OrderedDict
 from pymongo import MongoClient
 # Create the application instance
@@ -139,6 +140,15 @@ def shortestpath():
     json_object = json.dumps(python_json, ensure_ascii=False)
     return json.dumps({"path": djkistra_path, 'graph': json_object})
 
+@app.route('/enrichwithdelay', methods=['POST'])
+@cross_origin()
+def EnrichWithDelay():
+    json_object = request.get_json(force=True)['graph_data']
+    graphe = json_graph.node_link_graph(json_object)
+    newgraphe = graphStruc.EnrichWithDelay(graphe)
+    data = json_graph.node_link_data(newgraphe)
+    json_object = json.dumps(data, ensure_ascii=False)
+    return json.dumps({'graph': json_object})
 
 class Converter(Resource):
     def post(self):
