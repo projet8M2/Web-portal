@@ -160,8 +160,9 @@ def EnrichWithDelay():
                 long1 = node_src.get('Longitude')
                 lat2 = node_dst.get('Latitude')
                 long2 = node_dst.get('Longitude')
-                delay = calc.getLinkDelay(lat1, long1, lat2, long2)
-                graphe[edge[0]][edge[1]]['delay'] = delay
+                if((lat1 != None) and (lat2 != None) and (long1 != None) and (long2 != None)):
+                    delay = calc.getLinkDelay(lat1, long1, lat2, long2)
+                    graphe[edge[0]][edge[1]]['delay'] = delay
         except:
             pass
 
