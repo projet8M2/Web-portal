@@ -72,7 +72,7 @@ class NetworkGraph extends Component {
             className="btn btn-info"
             onClick={() => this.props.onClickButton("Calculer Latence")}
           >
-          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
+          <span class="glyphicon glyphicon-hourglass" aria-hidden="true"></span> 
             Calculer Latence
           </button>
         </div>
