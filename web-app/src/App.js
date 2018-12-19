@@ -123,8 +123,11 @@ class App extends Component {
           }
         });
         var jsonData = JSON.parse(res.data.graph);
+        var dataCopy = this.state.data;
+        dataCopy.nodes = jsonData.nodes
+        this.setState({ data: dataCopy })
         var highlighted = await this.highlightPath(res.data.path);
-        var dataCopy = {
+        dataCopy = {
           nodes: highlighted.nodes,
           links: highlighted.links,
           label: jsonData.graph.label
@@ -333,7 +336,7 @@ class App extends Component {
     }
   };
 
-  render() {  
+  render() {
     if (this.state.open) {
       var rows = [];
       Object.keys(this.state.message).map(k => {
