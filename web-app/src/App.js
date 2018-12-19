@@ -28,26 +28,48 @@ class App extends Component {
     showService: false,
     stringPath: ""
   };
-  success = message =>
-    toast.success(message, {
-      position: toast.POSITION.TOP_RIGHT
-    });
 
-  error = message => {
-    toast.error(message, {
-      position: toast.POSITION.TOP_RIGHT
+  /**
+   * Load saved graphs list
+   */
+  componentDidMount() {
+    axios.get("http://127.0.0.1:5000/getgraphlist").then(res => {
+      res.data.forEach(graph => {
+        this.setState((state, props) => ({
+          savedGraphs: [...state.savedGraphs, graph.graph.label]
+        }));
+      });
     });
+  }
+
+  /**
+   * Load a saved graph
+   */
+  getSavedGraph = fileName => {
+    axios
+      .post("http://127.0.0.1:5000/getsavedgraph", { gml_data: fileName })
+      .then(res => {
+        this.clearNetwork();
+        var json_data = res.data[0];
+        var dataCopy = {
+          nodes: json_data.nodes,
+          links: [],
+          label: json_data.graph.label
+        };
+        json_data.links.forEach(element => {
+          dataCopy.links.push(element);
+        });
+        this.setState({
+          jsonObject: json_data,
+          showNetwork: true,
+          data: dataCopy
+        });
+      });
   };
 
-  closeModal = () => {
-    this.setState({
-      open: false,
-      openServicePopup: false,
-      showService: false,
-      showServiceP: false
-    });
-  };
-
+  /**
+   * Convert Gml to Json
+   */
   callGmlToJson = (file, service) => {
     axios
       .post(`http://127.0.0.1:5000/converter`, {
@@ -82,6 +104,9 @@ class App extends Component {
       });
   };
 
+  /**
+   * Calculate and highlight service shortest part in the network graph.
+   */
   showBestPath() {
     axios
       .post("http://127.0.0.1:5000/shortestpath", {
@@ -115,140 +140,10 @@ class App extends Component {
       });
   }
 
-  componentDidMount() {
-    axios.get("http://127.0.0.1:5000/getgraphlist").then(res => {
-      res.data.forEach(graph => {
-        this.setState((state, props) => ({
-          savedGraphs: [...state.savedGraphs, graph.graph.label]
-        }));
-      });
-    });
-  }
-  clearNetwork = file => {
-    this.setState({ showNetwork: false, data: {}, stringPath: "" });
-  };
-  onClickNode = node => {
-    var json_data = this.state.data.nodes.filter(
-      dataNode => dataNode.id === node
-    );
-    this.setState({ open: true, message: json_data[0] });
-  };
-  onClickLink = (source, target) => {
-    var json_data = this.state.data.links.filter(
-      dataLink => dataLink.source === source && dataLink.target === target
-    );
-    this.setState({ open: true, message: json_data[0] });
-  };
-  onClickNodeService = node => {
-    var json_data = this.state.service_data.nodes.filter(
-      dataNode => dataNode.id === node
-    );
-    this.setState({ showServiceP: true, message: json_data[0] });
-  };
-  onClickLinkService = (source, target) => {
-    var json_data = this.state.service_data.links.filter(
-      dataLink => dataLink.source === source && dataLink.target === target
-    );
-    this.setState({ showServiceP: true, message: json_data[0] });
-  };
-
-  onClickButton = buttonName => {
-    if (buttonName === "Enregistrer Graphe") {
-      axios
-        .post(`http://127.0.0.1:5000/saveGraph`, {
-          gml_data: this.state.jsonObject
-        })
-        .then(res => {
-          if (res.data !== "error") {
-            this.setState((state, props) => ({
-              savedGraphs: [
-                ...state.savedGraphs,
-                this.state.jsonObject.graph.label
-              ]
-            }));
-            this.success("Votre Graphe a été enregistré avec succès");
-          } else {
-            this.error(
-              "Votre Graphe n'a pas été enregistré, vérifiez s'il est déjà enregistré"
-            );
-          }
-        });
-    } else if (buttonName === "Effacer Graphe") {
-      this.deleteGraph();
-    } else if (buttonName === "Charger Service") {
-      this.setState({ openServicePopup: true });
-    } else if (buttonName === "Calculer Latence") {
-      this.EnrichWithDelay();
-    }
-  };
-  deleteGraph = label => {
-    axios
-      .post(`http://127.0.0.1:5000/deletegraph`, {
-        gml_data: this.state.jsonObject.graph.label
-      })
-      .then(res => {
-        if (res.data.n !== 0) {
-          const label_list = this.state.savedGraphs;
-          const erasedGraph = this.state.jsonObject.graph.label;
-          this.setState({
-            savedGraphs: label_list.filter(label => label !== erasedGraph)
-          });
-          this.success("Votre Graphe a été effacé avec succès!");
-        } else {
-          this.error(
-            "Votre Graphe n'a pas été effacé, vérifiez s'il est déjà effacé"
-          );
-        }
-      });
-  };
-  getSavedGraph = fileName => {
-    axios
-      .post("http://127.0.0.1:5000/getsavedgraph", { gml_data: fileName })
-      .then(res => {
-        this.clearNetwork();
-        var json_data = res.data[0];
-        var dataCopy = {
-          nodes: json_data.nodes,
-          links: [],
-          label: json_data.graph.label
-        };
-        json_data.links.forEach(element => {
-          dataCopy.links.push(element);
-        });
-        this.setState({
-          jsonObject: json_data,
-          showNetwork: true,
-          data: dataCopy
-        });
-      });
-  };
-
-  EnrichWithDelay() {
-    axios
-      .post("http://127.0.0.1:5000/enrichwithdelay", {
-        graph_data: this.state.jsonObject
-      })
-      .then(res => {
-        this.clearNetwork();
-        var json_dataStr = res.data.graph;
-        var json_data = JSON.parse(json_dataStr);
-        var dataCopy = {
-          nodes: json_data.nodes,
-          links: [],
-          label: json_data.graph.label
-        };
-        json_data.links.forEach(element => {
-          dataCopy.links.push(element);
-        });
-        this.setState({
-          jsonObject: json_data,
-          showNetwork: true,
-          data: dataCopy
-        });
-        this.success("Latence calculée avec succès!");
-      });
-  }
-
+  /**
+   * Highlight shortest path
+   * @param {String[]} ids path
+   */
   async highlightPath(ids) {
     var nodes = this.state.data.nodes;
     var links = this.state.data.links;
@@ -281,7 +176,164 @@ class App extends Component {
     return res;
   }
 
-  render() {
+  /**
+   * Save graph in database
+   */
+  saveGraph() {
+    axios
+      .post(`http://127.0.0.1:5000/saveGraph`, {
+        gml_data: this.state.jsonObject
+      })
+      .then(res => {
+        if (res.data !== "error") {
+          this.setState((state, props) => ({
+            savedGraphs: [
+              ...state.savedGraphs,
+              this.state.jsonObject.graph.label
+            ]
+          }));
+          this.success("Votre Graphe a été enregistré avec succès");
+        } else {
+          this.error(
+            "Votre Graphe n'a pas été enregistré, vérifiez s'il est déjà enregistré"
+          );
+        }
+      });
+  }
+
+  /**
+   * Delete a graph in database
+   */
+  deleteGraph = label => {
+    axios
+      .post(`http://127.0.0.1:5000/deletegraph`, {
+        gml_data: this.state.jsonObject.graph.label
+      })
+      .then(res => {
+        if (res.data.n !== 0) {
+          const label_list = this.state.savedGraphs;
+          const erasedGraph = this.state.jsonObject.graph.label;
+          this.setState({
+            savedGraphs: label_list.filter(label => label !== erasedGraph)
+          });
+          this.success("Votre Graphe a été effacé avec succès!");
+        } else {
+          this.error(
+            "Votre Graphe n'a pas été effacé, vérifiez s'il est déjà effacé"
+          );
+        }
+      });
+  };
+
+  /**
+   * Calculate links delays
+   */
+  EnrichWithDelay() {
+    axios
+      .post("http://127.0.0.1:5000/enrichwithdelay", {
+        graph_data: this.state.jsonObject
+      })
+      .then(res => {
+        this.clearNetwork();
+        var json_dataStr = res.data.graph;
+        var json_data = JSON.parse(json_dataStr);
+        var dataCopy = {
+          nodes: json_data.nodes,
+          links: [],
+          label: json_data.graph.label
+        };
+        json_data.links.forEach(element => {
+          dataCopy.links.push(element);
+        });
+        this.setState({
+          jsonObject: json_data,
+          showNetwork: true,
+          data: dataCopy
+        });
+        this.success("Latence calculée avec succès!");
+      });
+  }
+
+  /**
+   * 
+   */
+  clearNetwork = file => {
+    this.setState({ showNetwork: false, data: {}, stringPath: "" });
+  };
+
+  /**
+   * Display success toast
+   */
+  success = message =>
+    toast.success(message, {
+      position: toast.POSITION.TOP_RIGHT
+    });
+
+  /**
+   * Display error toast
+   */
+  error = message => {
+    toast.error(message, {
+      position: toast.POSITION.TOP_RIGHT
+    });
+  };
+
+  /**
+   * Close Service modal
+   */
+  closeModal = () => {
+    this.setState({
+      open: false,
+      openServicePopup: false,
+      showService: false,
+      showServiceP: false
+    });
+  };
+
+  onClickNode = node => {
+    var json_data = this.state.data.nodes.filter(
+      dataNode => dataNode.id === node
+    );
+    this.setState({ open: true, message: json_data[0] });
+  };
+
+  onClickLink = (source, target) => {
+    var json_data = this.state.data.links.filter(
+      dataLink => dataLink.source === source && dataLink.target === target
+    );
+    this.setState({ open: true, message: json_data[0] });
+  };
+
+  onClickNodeService = node => {
+    var json_data = this.state.service_data.nodes.filter(
+      dataNode => dataNode.id === node
+    );
+    this.setState({ showServiceP: true, message: json_data[0] });
+  };
+
+  onClickLinkService = (source, target) => {
+    var json_data = this.state.service_data.links.filter(
+      dataLink => dataLink.source === source && dataLink.target === target
+    );
+    this.setState({ showServiceP: true, message: json_data[0] });
+  };
+
+  /**
+   * Manage action buttons
+   */
+  onClickButton = buttonName => {
+    if (buttonName === "Enregistrer Graphe") {
+      this.saveGraph();
+    } else if (buttonName === "Effacer Graphe") {
+      this.deleteGraph();
+    } else if (buttonName === "Charger Service") {
+      this.setState({ openServicePopup: true });
+    } else if (buttonName === "Calculer Latence") {
+      this.EnrichWithDelay();
+    }
+  };
+
+  render() {  
     if (this.state.open) {
       var rows = [];
       Object.keys(this.state.message).map(k => {
@@ -343,7 +395,7 @@ class App extends Component {
           <div
             className={
               this.state.savedGraphs === undefined ||
-              this.state.savedGraphs.length === 0
+                this.state.savedGraphs.length === 0
                 ? "col"
                 : "col-md-10"
             }
