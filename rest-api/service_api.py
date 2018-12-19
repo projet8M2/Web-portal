@@ -111,7 +111,7 @@ def shortestpath():
     service_data = request.get_json(force=True)['gml_data']
     djkistra_path = []
     old_target = ""
-    lenght = 0 
+    lenght = 0
     for key, value in enumerate(service_data['links']):
         actual_node = value['source']
         target_node = value['target']
@@ -125,23 +125,47 @@ def shortestpath():
                 graphe, actual_node, target_node)
         lenght = len(sub_path)
         for index, node in enumerate(sub_path):
-            if index<lenght-1:
+            if index < lenght-1:
                 try:
-                    actual_bandwith = graphe[node][sub_path[index+1]]['bandwith']
+                    actual_bandwith = graphe[node][sub_path[index+1]
+                                                   ]['bandwith']
                 except KeyError:
                     actual_bandwith = 0
                 graphe[node][sub_path[index+1]
-                            ]['bandwith'] = actual_bandwith - value['bandwith']
+                             ]['bandwith'] = actual_bandwith - value['bandwith']
         if key > 0:
-            if old_target ==  target_node:
+            if old_target == target_node:
                 sub_path = list(reversed(sub_path))
             sub_path = sub_path[1:]
         djkistra_path.extend(sub_path)
         old_target = target_node
+    lenghtService = len(service_data['nodes'])
+    for key, value in enumerate(service_data['nodes']):
+
+        initial_position = djkistra_path.index(value['id'])
+        if key+1<lenghtService:
+            last_position = djkistra_path.index(service_data['nodes'][key+1]['id'])
+        else:
+            last_position = len(djkistra_path)+1
+        for node in djkistra_path[initial_position:last_position]:
+            actual_cpu = 0
+            actual_disk = 0
+            actual_ram = 0
+            if 'Cpu' in graphe[node]:
+                actual_cpu = graphe[node]['Cpu']
+            if 'Ram' in graphe[node]:
+                actual_ram = graphe[node]['Ram']
+            if 'Disk' in graphe[node]:
+                actual_disk = graphe[node]['Disk']
+            type(value['Disk'])
+            graphe.nodes[node]['Disk'] = actual_disk + value['Disk']
+            graphe.nodes[node]['Ram'] = actual_ram + value['Ram']
+            graphe.nodes[node]['Cpu'] = actual_cpu + value['Cpu']
     python_json = json_graph.node_link_data(
-            graphe)
+        graphe)
     json_object = json.dumps(python_json, ensure_ascii=False)
     return json.dumps({"path": djkistra_path, 'graph': json_object})
+
 
 @app.route('/enrichwithdelay', methods=['POST'])
 @cross_origin()
@@ -169,6 +193,7 @@ def EnrichWithDelay():
     data = json_graph.node_link_data(graphe)
     json_object = json.dumps(data, ensure_ascii=False)
     return json.dumps({'graph': json_object})
+
 
 class Converter(Resource):
     def post(self):

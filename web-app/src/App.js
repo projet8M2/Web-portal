@@ -123,13 +123,16 @@ class App extends Component {
           }
         });
         var jsonData = JSON.parse(res.data.graph);
+        var dataCopy = this.state.data;
+        dataCopy.nodes = jsonData.nodes
+        this.setState({ data: dataCopy })
         var highlighted = await this.highlightPath(res.data.path);
-        var dataCopy = {
+        dataCopy = {
           nodes: highlighted.nodes,
           links: highlighted.links,
           label: jsonData.graph.label
         };
-
+        this.success("Votre service a été deployé avec succès");
         this.clearNetwork();
         this.setState({
           stringPath: path,
@@ -333,7 +336,7 @@ class App extends Component {
     }
   };
 
-  render() {  
+  render() {
     if (this.state.open) {
       var rows = [];
       Object.keys(this.state.message).map(k => {
@@ -383,15 +386,12 @@ class App extends Component {
             </div>
             <div className="logo-txt">Web portal</div>
           </div>
-        </div>
-        <div className="row">
           {this.state.savedGraphs.length !== 0 && (
             <ButtonList
               saveGraph={this.state.savedGraphs}
               click={this.getSavedGraph}
             />
           )}
-
           <div
             className={
               this.state.savedGraphs === undefined ||
