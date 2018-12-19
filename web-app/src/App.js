@@ -129,7 +129,7 @@ class App extends Component {
           links: highlighted.links,
           label: jsonData.graph.label
         };
-
+        this.success("Votre service a été deployé avec succès");
         this.clearNetwork();
         this.setState({
           stringPath: path,
@@ -383,15 +383,12 @@ class App extends Component {
             </div>
             <div className="logo-txt">Web portal</div>
           </div>
-        </div>
-        <div className="row">
           {this.state.savedGraphs.length !== 0 && (
             <ButtonList
               saveGraph={this.state.savedGraphs}
               click={this.getSavedGraph}
             />
           )}
-
           <div
             className={
               this.state.savedGraphs === undefined ||
