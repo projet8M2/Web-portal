@@ -123,9 +123,11 @@ class App extends Component {
           }
         });
         var jsonData = JSON.parse(res.data.graph);
+        console.log(JSON.stringify(jsonData, null, 4))
         var dataCopy = this.state.data;
         dataCopy.nodes = jsonData.nodes
-        this.setState({ data: dataCopy })
+        dataCopy.links = jsonData.links
+        await this.setState({ data: dataCopy })
         var highlighted = await this.highlightPath(res.data.path);
         dataCopy = {
           nodes: highlighted.nodes,

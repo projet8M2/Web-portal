@@ -34,6 +34,9 @@ graph [
     Longitude -77.03637
     Internal 1
     Latitude 38.89511
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 1
@@ -42,6 +45,9 @@ graph [
     Longitude -74.00597
     Internal 1
     Latitude 40.71427
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 2
@@ -50,6 +56,9 @@ graph [
     Longitude -84.38798
     Internal 1
     Latitude 33.749
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 3
@@ -58,6 +67,9 @@ graph [
     Longitude -80.19366
     Internal 1
     Latitude 25.77427
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 4
@@ -66,6 +78,9 @@ graph [
     Longitude -71.05977
     Internal 1
     Latitude 42.35843
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 5
@@ -74,6 +89,9 @@ graph [
     Longitude -0.12574
     Internal 1
     Latitude 51.50853
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 6
@@ -82,6 +100,9 @@ graph [
     Longitude -75.16379
     Internal 1
     Latitude 39.95234
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 7
@@ -90,6 +111,9 @@ graph [
     Longitude -76.61219
     Internal 1
     Latitude 39.29038
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 8
@@ -98,6 +122,9 @@ graph [
     Longitude 4.88969
     Internal 1
     Latitude 52.37403
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 9
@@ -106,6 +133,9 @@ graph [
     Longitude 8.68333
     Internal 1
     Latitude 50.11667
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 10
@@ -114,12 +144,18 @@ graph [
     Longitude -95.36327
     Internal 1
     Latitude 29.76328
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 11
     label "None"
     hyperedge 1
     Internal 1
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 12
@@ -128,6 +164,9 @@ graph [
     Longitude 2.3488
     Internal 1
     Latitude 48.85341
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 13
@@ -136,6 +175,9 @@ graph [
     Longitude -96.80667
     Internal 1
     Latitude 32.78306
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 14
@@ -144,6 +186,9 @@ graph [
     Longitude -97.74306
     Internal 1
     Latitude 30.26715
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 15
@@ -152,6 +197,9 @@ graph [
     Longitude -122.33207
     Internal 1
     Latitude 47.60621
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 16
@@ -160,6 +208,9 @@ graph [
     Longitude -122.67621
     Internal 1
     Latitude 45.52345
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 17
@@ -168,6 +219,9 @@ graph [
     Longitude 139.5813
     Internal 1
     Latitude 35.61488
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 18
@@ -176,6 +230,9 @@ graph [
     Longitude -122.41942
     Internal 1
     Latitude 37.77493
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 19
@@ -184,6 +241,9 @@ graph [
     Longitude -118.24368
     Internal 1
     Latitude 34.05223
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 20
@@ -192,6 +252,9 @@ graph [
     Longitude -112.07404
     Internal 1
     Latitude 33.44838
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 21
@@ -200,6 +263,9 @@ graph [
     Longitude -104.9847
     Internal 1
     Latitude 39.73915
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   node [
     id 22
@@ -208,160 +274,194 @@ graph [
     Longitude -87.65005
     Internal 1
     Latitude 41.85003
+    Cpu 3200
+    Ram 4
+    Disk 200
   ]
   edge [
     source 0
     target 2
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 0
     target 4
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 0
     target 5
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 0
     target 7
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 1
     target 8
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 1
     target 6
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 1
     target 4
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 1
     target 5
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 1
     target 22
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 2
     target 10
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 2
     target 3
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 3
     target 10
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 5
     target 12
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 5
     target 8
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 6
     target 7
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 8
     target 9
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 9
     target 12
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 10
     target 20
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 10
     target 13
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 10
     target 14
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 11
     target 13
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 11
     target 22
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 11
     target 21
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 13
     target 14
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 15
     target 16
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 15
     target 22
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 16
     target 18
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 17
     target 18
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 18
     target 19
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 18
     target 21
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
   edge [
     source 19
     target 20
     LinkLabel "Leased Wavelength/Managed Service"
+    bandwith 10
   ]
 ]
